@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Image from "next/image";
@@ -38,7 +39,7 @@ export default function Home() {
         favoriteCount: row.favorite_count,
         retweetCount: row.retweet_count,
         replyCount: row.reply_count,
-        quoteCount: row.quote_count
+        quoteCount: row.quote_count,
       }));
       setSearchResults(dbTweets);
     } catch (error) {
