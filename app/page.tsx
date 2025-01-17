@@ -4,28 +4,31 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useState } from "react";
-import { tweets, Tweet } from "./fake-tweets";
-import { client } from "@/db/turso";
+import { dbClient } from "@/app/db/turso";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Tweet[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
     try {
-      const result = await client.execute("SELECT * FROM products");
-      console.log("Products:", result.rows);
-
-      // Get 4 random tweets
-      const shuffled = [...tweets].sort(() => 0.5 - Math.random());
-      const randomTweets = shuffled.slice(0, 4);
-
-      setSearchResults(randomTweets);
+      const result = await dbClient.execute("SELECT * FROM tweets");
+      const dbTweets = result.rows.map((row: any) => ({
+        id: row.tweet_id,
+        userId: row.user_id,
+        username: row.username,
+        content: row.content,
+        createdAt: row.created_at,
+        favoriteCount: row.favorite_count,
+        retweetCount: row.retweet_count,
+        replyCount: row.reply_count,
+        quoteCount: row.quote_count
+      }));
+      setSearchResults(dbTweets);
     } catch (error) {
       console.error("Error searching tweets:", error);
     } finally {
@@ -75,25 +78,20 @@ export default function Home() {
               {searchResults.map((tweet) => (
                 <div key={tweet.id} className="p-4 border rounded-lg">
                   <div className="flex items-center gap-3 mb-2">
-                    <img
-                      src={tweet.author.avatar}
-                      alt={tweet.author.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
+                    <div className="w-10 h-10 bg-gray-200 rounded-full" />
                     <div>
-                      <p className="font-semibold">{tweet.author.name}</p>
+                      <p className="font-semibold">@{tweet.username}</p>
                       <p className="text-sm text-gray-500">
-                        @{tweet.author.username}
+                        {new Date(tweet.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <p className="mb-2">{tweet.text}</p>
+                  <p className="mb-2">{tweet.content}</p>
                   <div className="flex gap-4 text-sm text-gray-500">
-                    <span>❤️ {tweet.likes}</span>
-                    <span>🔄 {tweet.retweets}</span>
-                    <span>💬 {tweet.replies}</span>
+                    <span>❤️ {tweet.favoriteCount}</span>
+                    <span>🔄 {tweet.retweetCount}</span>
+                    <span>💬 {tweet.replyCount}</span>
+                    <span>🔁 {tweet.quoteCount}</span>
                   </div>
                 </div>
               ))}

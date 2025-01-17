@@ -7,13 +7,15 @@ const openai = new OpenAI({
 export default openai;
 
 
-export async function createEmbeddings(
-  input: string | Array<string> | Array<number> | Array<Array<number>>,
-) {
+export async function createEmbeddings(input: string): Promise<number[]> {
+  console.log("Creating embeddings for input", input);
+
   const response = await openai.embeddings.create({
     model: 'text-embedding-ada-002',
     input,
   });
 
-  return response.data.map((item) => item.embedding);
+  console.log("Embedding response", response);
+
+  return response.data[0].embedding;
 }
