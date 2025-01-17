@@ -5,23 +5,11 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useState } from "react";
-import { dbClient } from "@/app/db/turso";
-
-type Tweet = {
-  id: string;
-  userId: string;
-  username: string;
-  content: string;
-  createdAt: string;
-  favoriteCount: number;
-  retweetCount: number;
-  replyCount: number;
-  quoteCount: number;
-};
+import { SearchResult } from "@/app/db/search";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Tweet[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async () => {
@@ -29,19 +17,12 @@ export default function Home() {
 
     setIsLoading(true);
     try {
-      const result = await dbClient.execute("SELECT * FROM tweets");
-      const dbTweets = result.rows.map((row: any) => ({
-        id: row.tweet_id,
-        userId: row.user_id,
-        username: row.username,
-        content: row.content,
-        createdAt: row.created_at,
-        favoriteCount: row.favorite_count,
-        retweetCount: row.retweet_count,
-        replyCount: row.reply_count,
-        quoteCount: row.quote_count,
-      }));
-      setSearchResults(dbTweets);
+      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) {
+        throw new Error('Search request failed');
+      }
+      const results = await response.json();
+      setSearchResults(results);
     } catch (error) {
       console.error("Error searching tweets:", error);
     } finally {
