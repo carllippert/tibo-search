@@ -5,19 +5,21 @@ import { Input } from "@/components/ui/input";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useState } from "react";
 import { tweets, Tweet } from "./fake-tweets";
+import { client } from "@/db/turso";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Tweet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const result = await client.execute("SELECT * FROM products");
+      console.log("Products:", result.rows);
 
       // Get 4 random tweets
       const shuffled = [...tweets].sort(() => 0.5 - Math.random());
@@ -43,7 +45,9 @@ export default function Home() {
             height={120}
             priority
           />
-          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">The Search Begins</h1>
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+            The Search Begins
+          </h1>
         </div>
 
         <div className="flex w-full gap-2 h-10">
