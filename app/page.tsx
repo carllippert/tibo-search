@@ -6,9 +6,21 @@ import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useState } from "react";
 import { dbClient } from "@/app/db/turso";
 
+type Tweet = {
+  id: string;
+  userId: string;
+  username: string;
+  content: string;
+  createdAt: string;
+  favoriteCount: number;
+  retweetCount: number;
+  replyCount: number;
+  quoteCount: number;
+};
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Tweet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async () => {
