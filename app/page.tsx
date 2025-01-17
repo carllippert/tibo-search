@@ -43,7 +43,7 @@ export default function Home() {
             height={120}
             priority
           />
-          <h1 className="text-4xl font-bold">The Search Begins</h1>
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">The Search Begins</h1>
         </div>
 
         <div className="flex w-full gap-2 h-10">
