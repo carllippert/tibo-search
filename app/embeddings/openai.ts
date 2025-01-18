@@ -6,7 +6,6 @@ const openai = new OpenAI({
 
 export default openai;
 
-
 export async function createEmbeddings(input: string): Promise<number[]> {
   console.log("Creating embeddings for input", input);
 

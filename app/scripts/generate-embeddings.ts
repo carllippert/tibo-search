@@ -1,58 +1,103 @@
 import { dbClient } from '@/app/db/turso';
 import { createEmbeddings } from '@/app/embeddings/openai';
+import { createReadStream } from 'fs';
+import { createInterface } from 'readline';
 
-// Test with just 2 tweets initially
-const SAMPLE_TWEETS = [
-  {
-    id_str: "1785613648720703634",
-    user: {
-      id_str: "470129898", 
-      screen_name: "tibo_maker"
-    },
-    full_text: "𝗛𝗼𝘁 𝘁𝗮𝗸𝗲:\n\nInstagram: Average people pretend to be millionaires.\n\nTwitter: Millionaires pretend to be average people.",
-    created_at: "Wed May 01 10:14:03 +0000 2024",
-    favorite_count: 0,
-    retweet_count: 0,
-    reply_count: 0,
-    quote_count: 0,
-  },
-  {
-    id_str: "1646511342906638337",
-    user: {
-      id_str: "470129898",
-      screen_name: "tibo_maker"
-    },
-    full_text: "I spent hours digging through every bit of the Twitter Algorithm.\n\nRead this to 10x your Twitter growth - in 5 minutes:",
-    created_at: "Thu Apr 13 13:51:09 +0000 2023",
-    favorite_count: 0,
-    retweet_count: 0,
-    reply_count: 0,
-    quote_count: 0,
+// Helper function to clean tweet text
+function preprocessTweetText(text: string): string {
+  return text
+    // Remove URLs
+    .replace(/https?:\/\/\S+/g, '')
+    // Remove mentions but keep the username for context
+    .replace(/@(\w+)/g, '$1')
+    // Remove RT prefix
+    .replace(/^RT\s+/g, '')
+    // Remove multiple spaces
+    .replace(/\s+/g, ' ')
+    // Remove hashtag symbol but keep the text
+    .replace(/#(\w+)/g, '$1')
+    // Remove special characters but keep emojis
+    .replace(/[^\p{L}\p{N}\p{P}\p{Z}\p{Emoji}\p{Emoji_Presentation}]/gu, ' ')
+    .trim();
+}
+
+// Helper function to chunk long text if needed
+function chunkText(text: string, maxLength: number = 500): string[] {
+  if (text.length <= maxLength) return [text];
+  
+  // Split by sentences to maintain context
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const chunks: string[] = [];
+  let currentChunk = '';
+
+  for (const sentence of sentences) {
+    if ((currentChunk + sentence).length <= maxLength) {
+      currentChunk += sentence;
+    } else {
+      if (currentChunk) chunks.push(currentChunk.trim());
+      currentChunk = sentence;
+    }
   }
-];
+  
+  if (currentChunk) chunks.push(currentChunk.trim());
+  return chunks;
+}
 
 async function main() {
   try {
-    for (const tweet of SAMPLE_TWEETS) {
-      // Generate embedding for tweet content
-      const embedding = await createEmbeddings(tweet.full_text);
-      
-      // Store tweet data and embedding
-      await storeTweet({
-        tweet_id: tweet.id_str,
-        user_id: tweet.user.id_str,
-        username: tweet.user.screen_name,
-        content: tweet.full_text,
-        created_at: tweet.created_at,
-        favorite_count: tweet.favorite_count,
-        retweet_count: tweet.retweet_count,
-        reply_count: tweet.reply_count,
-        quote_count: tweet.quote_count,
-        embedding,
-      });
+    // Create read stream for tweets.jsonl
+    const fileStream = createReadStream('tweets.jsonl');
+    const rl = createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+    });
+
+    // Process each line (tweet) in the file
+    for await (const line of rl) {
+      try {
+        const tweet = JSON.parse(line);
+
+        // Skip tweets with errors or missing text
+        if (tweet.error || !tweet.full_text) {
+          console.log('Skipping invalid tweet:', tweet.error || 'No text content');
+          continue;
+        }
+
+        // Clean and preprocess the tweet text
+        const cleanedText = preprocessTweetText(tweet.full_text);
+        
+        // Skip if text is too short after cleaning
+        if (cleanedText.length < 10) {
+          console.log('Skipping tweet with insufficient content after cleaning');
+          continue;
+        }
+
+        // Generate embedding for tweet content
+        const embedding = await createEmbeddings(cleanedText);
+        
+        // Store tweet data and embedding
+        await storeTweet({
+          tweet_id: tweet.id_str,
+          user_id: tweet.user.id_str,
+          username: tweet.user.screen_name,
+          content: tweet.full_text, // Store original content for display
+          cleaned_content: cleanedText, // Store cleaned content for reference
+          created_at: tweet.created_at,
+          favorite_count: tweet.favorite_count,
+          retweet_count: tweet.retweet_count,
+          reply_count: tweet.reply_count,
+          quote_count: tweet.quote_count,
+          embedding,
+        });
+
+      } catch (error) {
+        console.error('Error processing tweet:', error);
+        // Continue with next tweet instead of exiting
+        continue;
+      }
     }
 
-    console.log('Successfully processed sample tweets');
+    console.log('Successfully processed all tweets');
     
   } catch (error) {
     console.error('Error processing tweets:', error);
@@ -65,6 +110,7 @@ async function storeTweet(data: {
   user_id: string;
   username: string;
   content: string;
+  cleaned_content: string;
   created_at: string;
   favorite_count: number;
   retweet_count: number;
@@ -75,15 +121,16 @@ async function storeTweet(data: {
   try {
     await dbClient.execute({
       sql: `INSERT INTO tweets (
-        tweet_id, user_id, username, content, created_at, 
+        tweet_id, user_id, username, content, cleaned_content, created_at, 
         favorite_count, retweet_count, reply_count, quote_count,
         embedding
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         data.tweet_id,
         data.user_id,
         data.username,
         data.content,
+        data.cleaned_content,
         data.created_at,
         data.favorite_count,
         data.retweet_count,
