@@ -37,52 +37,55 @@ export default function Home() {
   };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center w-full max-w-7xl">
-        <div className="flex items-center gap-8 mb-8">
-          <Image
-            className="rounded-full overflow-hidden"
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-4 pb-20 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-6 sm:gap-8 row-start-2 items-center w-full max-w-7xl">
+        <div className="flex flex-col items-center gap-4 sm:gap-8 mb-4 sm:mb-8 text-center sm:text-left">
+          {/* <Image
+            className="rounded-full overflow-hidden w-24 h-24 sm:w-[120px] sm:h-[120px]"
             src="/tibo.jpg"
             alt="Tibo logo"
             width={120}
             height={120}
             priority
-          />
-          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-            The Search Begins
+          /> */}
+          <h1 className="scroll-m-20 text-3xl sm:text-4xl font-extrabold tracking-tight lg:text-5xl">
+            Just Search
           </h1>
+          <div className="text-sm text-muted-foreground">
+            because "one more feature" is the path to destruction
+          </div>
         </div>
 
-        <div className="flex w-full max-w-2xl mx-auto gap-2 h-10">
+        <div className="flex flex-col sm:flex-row w-full max-w-2xl mx-auto gap-2">
           <Input
             type="search"
             placeholder="Search 'Startups', 'Rockets', 'AI'..."
-            className="flex-1 h-full"
+            className="flex-1 h-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
           <RainbowButton
-            className="h-full"
+            className="h-10 w-full sm:w-auto"
             onClick={handleSearch}
             disabled={isLoading}
           >
-            {isLoading ? "Searching..." : "Search for Inspiration"}
+            {isLoading ? "Searching..." : "Search"}
           </RainbowButton>
         </div>
 
         {searchResults.length > 0 && (
           <div className="w-full">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
               <h2 className="text-xl font-semibold">Search Results</h2>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                 <div className="flex items-center gap-2">
                   <span className="text-sm">List</span>
                   <Switch checked={useGrid} onCheckedChange={setUseGrid} />
                   <span className="text-sm">Grid</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">Simple Tweets</span>
+                  <span className="text-sm">Simple</span>
                   <Switch
                     checked={useReactTweet}
                     onCheckedChange={setUseReactTweet}
@@ -103,7 +106,7 @@ export default function Home() {
             <div
               className={`${
                 useGrid
-                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                   : "space-y-4"
               }`}
             >
@@ -121,8 +124,8 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
-                    <p className="mb-2">{tweet.content}</p>
-                    <div className="flex gap-4 text-sm text-gray-500">
+                    <p className="mb-2 break-words">{tweet.content}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                       <span>❤️ {tweet.favoriteCount}</span>
                       <span>🔄 {tweet.retweetCount}</span>
                       <span>💬 {tweet.replyCount}</span>
@@ -136,24 +139,24 @@ export default function Home() {
         )}
       </main>
 
-      {/* <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm text-muted-foreground">
+      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm text-muted-foreground">
         <a
           className="hover:text-foreground transition-colors"
           href="https://nextjs.org/docs"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Documentation
+          Readme
         </a>
         <a
           className="hover:text-foreground transition-colors"
-          href="https://github.com/vercel/next.js"
+          href="https://twitter.com/carllippert"
           target="_blank"
           rel="noopener noreferrer"
         >
-          GitHub
+          By Carl Lippert
         </a>
-      </footer> */}
+      </footer>
     </div>
   );
 }
