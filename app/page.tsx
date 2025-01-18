@@ -83,7 +83,7 @@ export default function Home() {
         </a>
         <a
           className="hover:text-foreground transition-colors"
-          href="https://twitter.com/carllippert"
+          href="https://carllippert.com"
           target="_blank"
           rel="noopener noreferrer"
         >
