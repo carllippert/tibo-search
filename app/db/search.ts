@@ -35,7 +35,7 @@ export async function semanticSearch(query: string): Promise<SearchResult[]> {
           1 - vector_distance_cos(embedding, vector32(?)) as similarity
         FROM tweets
         ORDER BY similarity DESC
-        LIMIT 10;
+        LIMIT 12;
       `,
       args: [new Float32Array(queryEmbedding).buffer as ArrayBuffer]
     });
