@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createEmbeddings } from "@/app/embeddings/openai";
 import { dbClient } from "./turso";
 

@@ -39,7 +39,7 @@ export default function Home() {
             Just Search
           </h1>
           <div className="text-sm text-muted-foreground">
-            because "one more feature" is the path to failure
+            {`because "one more feature" is the path to failure`}
           </div>
         </div>
 

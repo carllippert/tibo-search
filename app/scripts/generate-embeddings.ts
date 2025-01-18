@@ -21,28 +21,6 @@ function preprocessTweetText(text: string): string {
     .trim();
 }
 
-// Helper function to chunk long text if needed
-function chunkText(text: string, maxLength: number = 500): string[] {
-  if (text.length <= maxLength) return [text];
-  
-  // Split by sentences to maintain context
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-  const chunks: string[] = [];
-  let currentChunk = '';
-
-  for (const sentence of sentences) {
-    if ((currentChunk + sentence).length <= maxLength) {
-      currentChunk += sentence;
-    } else {
-      if (currentChunk) chunks.push(currentChunk.trim());
-      currentChunk = sentence;
-    }
-  }
-  
-  if (currentChunk) chunks.push(currentChunk.trim());
-  return chunks;
-}
-
 async function main() {
   try {
     // Create read stream for tweets.jsonl

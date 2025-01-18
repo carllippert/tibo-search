@@ -9,11 +9,13 @@
 - Might be good to only show results that are "Very Close" to the query vs just the 10 closest
   -> In long tail searches in a smallish dataset you see a bunch of stuff that is not very relevant
 
+- Problably better ways to handle env / keys for Turso. Should Turso Auth Key Be on client? ( For this hack I'm ok with it )
+
 ## Stack:
 
 [Vector DB via Sqlite using Turso](https://docs.turso.tech/features/ai-and-embeddings)
 
-- You probably don't need some proprietary vector db solution with a big price tag. 
+- You probably don't need some proprietary vector db solution with a big price tag.
 
 - Have wanted to use Turso Sqlite for a different project and also like open source db solutions when I can so wanted to test using them as a vector db vs more well known options.
 
@@ -31,6 +33,10 @@ OpenAI
 
 - The easiest path to embeddings. Didn't want to try anything new here but other options can be explored to reduce dependency or costs depending on volume
 
+Hosting
+
+- Vercel
+
 ## Data:
 
 - 200 tweets scraped from ElonMusk and Tibo_Maker via Apify. ( Simple & Fast option for a little hack )
@@ -41,5 +47,3 @@ OpenAI
 ## Personal Amplification Tools
 
 - Cursor AI + Claude 3.5
-
-
